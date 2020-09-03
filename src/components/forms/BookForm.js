@@ -13,6 +13,7 @@ class BookForm extends React.Component {
         pages: this.props.book.pages
       },
       covers: this.props.book.covers,
+      index: 0,
       loading: false,
       errors: {}
     };
@@ -59,6 +60,15 @@ class BookForm extends React.Component {
         }
     };
 
+    changeCover = () => {
+        const { index, covers } = this.state;
+        const newIndex = index + 1 >= covers.length ? 0 : index + 1;
+        this.setState({
+          index: newIndex,
+          data: { ...this.state.data, cover: covers[newIndex] }
+        });
+    };
+
     validate = data => {
         const errors = {};
         if (!data.title) errors.title = "Can't be blank";
@@ -74,7 +84,7 @@ class BookForm extends React.Component {
         return (
             <Segment>
                 <Form onSubmit={this.onSubmit} loading={loading}>
-                    <Grid columns={2} fluid stackable>
+                    <Grid columns={2} fluid="true" stackable>
                         <Grid.Row>
                             <Grid.Column>
                                 <Form.Field error={!!errors.title}>
@@ -106,10 +116,11 @@ class BookForm extends React.Component {
                                 <Form.Field error={!!errors.pages}>
                                     <label htmlFor="pages">Book Pages</label>
                                     <input
+                                        disabled={!data.pages === undefined}
                                         type="text"
                                         id="pages"
                                         name="pages"
-                                        value={data.pages}
+                                        value={data.pages !== undefined ? data.pages : "Loading..."}
                                         onChange={this.onChangeNumber}
                                     />
                                     {errors.pages && <InlineError text={errors.pages} />}
@@ -118,6 +129,11 @@ class BookForm extends React.Component {
 
                             <Grid.Column>
                                 <Image size="small" src={data.cover} />
+                                {this.state.covers.length > 1 && (
+                                    <a href="/some/valid/uri" tabIndex={0} onClick={this.changeCover}> 
+                                        Another Cover 
+                                    </a>
+                                )}
                             </Grid.Column>
                         </Grid.Row>
 
@@ -131,7 +147,7 @@ class BookForm extends React.Component {
     }   
 } 
 
-BookForm.propTypes ={
+BookForm.propTypes = {
     submit: PropTypes.func.isRequired,
     book: PropTypes.shape({
         goodreadsId: PropTypes.string.isRequired,
